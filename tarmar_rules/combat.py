@@ -32,6 +32,16 @@ MATRIX: dict[str, dict[str, int]] = {
 # Heavy target they ignore half the armour's stops.
 HEAVY_CLASSES: frozenset[str] = frozenset({"Heavy Striking", "Heavy Thrusting"})
 
+# §7 crit / fumble knobs.
+CRIT_DAMAGE_MULTIPLIER = 2         # natural 20: damage dice rolled twice
+SEVERE_CRIT_DAMAGE_MULTIPLIER = 3  # confirmed severe crit: triple damage
+OFF_BALANCE_PENALTY = -2           # fumble 1-3: to the fumbler's next action
+
+# §7 fumble-table outcomes (d6).
+FUMBLE_OFF_BALANCE = "off_balance"  # 1-3: -2 to your next action
+FUMBLE_DROP = "drop"                # 4-5: drop weapon
+FUMBLE_STRESS = "stress"            # 6: weapon takes stress (breaks on a second fumble)
+
 # §3 modifier knobs.
 DEX_MODIFIER_DIVISOR = 2  # floor((DEX - 10) / 2)
 SKILL_BONUS_PER_LEVEL = (
@@ -159,6 +169,44 @@ def resolve_attack(die_roll: int, a_target_number: int, bonus: int) -> dict:
         "fumble": False,
         "outcome": "hit" if hit else "miss",
     }
+
+
+def confirm_severe_crit(
+    confirm_die_roll: int, a_target_number: int, bonus: int
+) -> bool:
+    """§7: does a natural-20 crit upgrade to the severe result?
+
+    After a natural 20 the attacker immediately rolls a *second* d20 to-hit
+    against the same Target Number; if that confirm roll also hits, the crit
+    is severe (triple damage + bleeding, and the blow reaches Body as well as
+    Fatigue). The confirm is itself a full to-hit roll, so the natural
+    extremes apply: a 20 always confirms, a 1 never does.
+
+    The confirm die is passed in rather than rolled here (same contract as
+    :func:`resolve_attack`) so resolution stays pure and testable.
+    """
+    return resolve_attack(confirm_die_roll, a_target_number, bonus)["hit"]
+
+
+def fumble_result(fumble_die_roll: int) -> str:
+    """§7 fumble table: map the d6 rolled after a natural 1 to its outcome.
+
+    1-3 → :data:`FUMBLE_OFF_BALANCE` (:data:`OFF_BALANCE_PENALTY` to the
+    fumbler's next action) · 4-5 → :data:`FUMBLE_DROP` (weapon dropped) ·
+    6 → :data:`FUMBLE_STRESS` (the weapon takes stress and breaks on a second
+    fumble). This table is stateless — the caller tracks the stress and the
+    eventual break.
+
+    Raises:
+        ValueError: if ``fumble_die_roll`` is not a d6 face.
+    """
+    if not 1 <= fumble_die_roll <= 6:
+        raise ValueError(f"fumble d6 roll out of range: {fumble_die_roll}")
+    if fumble_die_roll <= 3:
+        return FUMBLE_OFF_BALANCE
+    if fumble_die_roll <= 5:
+        return FUMBLE_DROP
+    return FUMBLE_STRESS
 
 
 def damage_after_armour(

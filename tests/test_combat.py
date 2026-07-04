@@ -100,3 +100,35 @@ def test_balance_surface(expected, skill_level) -> None:
         for tier, chance in zip(combat.ARMOUR_TIERS, row):
             target = combat.target_number(weapon_class, tier)
             assert combat.hit_probability(target, bonus) == pytest.approx(chance)
+
+
+def test_confirm_severe_crit_is_a_second_to_hit_roll() -> None:
+    # Confirm hits the same TN with the same bonus -> severe.
+    assert combat.confirm_severe_crit(15, a_target_number=13, bonus=0)
+    assert not combat.confirm_severe_crit(8, a_target_number=13, bonus=0)
+    # The bonus counts on the confirm too.
+    assert combat.confirm_severe_crit(9, a_target_number=13, bonus=4)
+    # Natural extremes apply: a 20 always confirms, a 1 never does.
+    assert combat.confirm_severe_crit(20, a_target_number=99, bonus=0)
+    assert not combat.confirm_severe_crit(1, a_target_number=2, bonus=10)
+    with pytest.raises(ValueError):
+        combat.confirm_severe_crit(0, a_target_number=10, bonus=0)
+
+
+def test_fumble_table_covers_the_d6() -> None:
+    assert [combat.fumble_result(face) for face in range(1, 7)] == [
+        combat.FUMBLE_OFF_BALANCE,
+        combat.FUMBLE_OFF_BALANCE,
+        combat.FUMBLE_OFF_BALANCE,
+        combat.FUMBLE_DROP,
+        combat.FUMBLE_DROP,
+        combat.FUMBLE_STRESS,
+    ]
+    with pytest.raises(ValueError):
+        combat.fumble_result(7)
+
+
+def test_crit_and_fumble_knobs() -> None:
+    assert combat.CRIT_DAMAGE_MULTIPLIER == 2
+    assert combat.SEVERE_CRIT_DAMAGE_MULTIPLIER == 3
+    assert combat.OFF_BALANCE_PENALTY == -2
