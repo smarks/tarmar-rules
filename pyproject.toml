@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tarmar-rules"
-version = "0.2.0"
+version = "0.2.1"
 description = "Tarmar d20 combat-resolution core (weapon-vs-armour matrix, modifiers, crit, Hybrid armour) shared across games."
 requires-python = ">=3.11"
 dependencies = []

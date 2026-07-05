@@ -27,8 +27,16 @@ def test_dodge_modifier_floors_at_zero() -> None:
 
 def test_skill_bonus_ladder() -> None:
     assert combat.skill_bonus(0) == 0
-    assert combat.skill_bonus(3) == 6
+    assert combat.skill_bonus(2) == 4  # normal value: Expert
+    assert combat.skill_bonus(3) == 6  # at the cap: Master
     assert combat.skill_bonus(-1) == 0
+
+
+def test_skill_bonus_clamps_over_cap() -> None:
+    assert combat.SKILL_LEVEL_MAX == 3
+    # Over the cap clamps to the Master bonus, never exceeding it.
+    assert combat.skill_bonus(4) == 6
+    assert combat.skill_bonus(99) == 6
 
 
 def test_under_strength_penalty_equals_shortfall() -> None:

@@ -45,8 +45,9 @@ FUMBLE_STRESS = "stress"            # 6: weapon takes stress (breaks on a second
 # §3 modifier knobs.
 DEX_MODIFIER_DIVISOR = 2  # floor((DEX - 10) / 2)
 SKILL_BONUS_PER_LEVEL = (
-    2  # skill level 0-5 -> +0..+10; tiers Trained/Expert/Master = +2/+4/+6
+    2  # per skill level; tiers Untrained/Trained/Expert/Master = +0/+2/+4/+6
 )
+SKILL_LEVEL_MAX = 3  # §3 ladder tops out at Master (level 3 -> +6); the cap
 SHORTFALL_PENALTY_PER_POINT = (
     1  # §3.1 under-strength: -1 to hit per point under str_req
 )
@@ -66,8 +67,15 @@ def dodge_modifier(dexterity: int) -> int:
 
 
 def skill_bonus(skill_level: int) -> int:
-    """To-hit bonus from weapon skill level (0-5), ``SKILL_BONUS_PER_LEVEL`` each."""
-    return SKILL_BONUS_PER_LEVEL * max(0, skill_level)
+    """To-hit bonus from weapon skill level, ``SKILL_BONUS_PER_LEVEL`` each.
+
+    The spec's §3 ladder is Untrained/Trained/Expert/Master (levels 0-3 ->
+    +0/+2/+4/+6), so the level is clamped to ``[0, SKILL_LEVEL_MAX]``. A caller
+    passing a value below 0 or above the cap can never earn more than the
+    documented Master bonus (+6).
+    """
+    clamped_skill_level = min(max(0, skill_level), SKILL_LEVEL_MAX)
+    return SKILL_BONUS_PER_LEVEL * clamped_skill_level
 
 
 def strength_fit_penalty(effective_strength: int, str_req: int | None) -> int:
