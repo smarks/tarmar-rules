@@ -1,8 +1,9 @@
 """tarmar-rules — the Tarmar d20 combat-resolution core, shared across games.
 
 The single source of truth for the weapon-class x armour-tier Target-Number
-matrix and the d20 roll-over resolution (to-hit modifiers, the under-strength
-penalty, crit/fumble, and the Hybrid armour rule). Carries no game-specific data
+matrix and the d20 roll-over resolution (to-hit modifiers, the weapon-skill
+transfer layer, the under-strength penalty, the integrated §7 crit/fumble
+resolution, and the Hybrid armour rule). Carries no game-specific data
 (weapons, armour, figures) — each game tags its own catalog with a
 ``weapon_class`` / ``armour_tier`` and calls these pure functions.
 
@@ -16,47 +17,65 @@ from __future__ import annotations
 from .combat import (
     ARMOUR_TIERS,
     CRIT_DAMAGE_MULTIPLIER,
+    CRIT_DAMAGE_ROLLS,
+    DIE_FACES,
+    FUMBLE_DIE_SIDES,
     FUMBLE_DROP,
     FUMBLE_OFF_BALANCE,
     FUMBLE_STRESS,
+    FUMBLE_TABLE,
     HEAVY_CLASSES,
     MATRIX,
     OFF_BALANCE_PENALTY,
+    SAME_CLASS_LEVEL_DIVISOR,
     SEVERE_CRIT_DAMAGE_MULTIPLIER,
-    SKILL_LEVEL_MAX,
+    SEVERE_CRIT_DAMAGE_ROLLS,
+    SKILL_BONUS_PER_LEVEL,
     confirm_severe_crit,
     damage_after_armour,
     dex_modifier,
     dodge_modifier,
     fumble_result,
+    fumble_table_lookup,
     hit_probability,
     resolve_attack,
+    same_class_skill_bonus,
     skill_bonus,
     strength_fit_penalty,
     target_number,
     to_hit_bonus,
+    weapon_skill_bonus,
 )
 
 __all__ = [
     "ARMOUR_TIERS",
     "CRIT_DAMAGE_MULTIPLIER",
+    "CRIT_DAMAGE_ROLLS",
+    "DIE_FACES",
+    "FUMBLE_DIE_SIDES",
     "FUMBLE_DROP",
     "FUMBLE_OFF_BALANCE",
     "FUMBLE_STRESS",
+    "FUMBLE_TABLE",
     "HEAVY_CLASSES",
     "MATRIX",
     "OFF_BALANCE_PENALTY",
+    "SAME_CLASS_LEVEL_DIVISOR",
     "SEVERE_CRIT_DAMAGE_MULTIPLIER",
-    "SKILL_LEVEL_MAX",
+    "SEVERE_CRIT_DAMAGE_ROLLS",
+    "SKILL_BONUS_PER_LEVEL",
     "confirm_severe_crit",
     "damage_after_armour",
     "dex_modifier",
     "dodge_modifier",
     "fumble_result",
+    "fumble_table_lookup",
     "hit_probability",
     "resolve_attack",
+    "same_class_skill_bonus",
     "skill_bonus",
     "strength_fit_penalty",
     "target_number",
     "to_hit_bonus",
+    "weapon_skill_bonus",
 ]
